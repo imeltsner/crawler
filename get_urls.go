@@ -2,28 +2,35 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"golang.org/x/net/html"
 )
 
 func getURLsFromHTML(htmlBody, rawBaseURL string) ([]string, error) {
-	htmlReader := strings.NewReader(htmlBody)
-
-	nodes, err := html.Parse(htmlReader)
+	baseURL, err := url.Parse(rawBaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse html %w", err)
+		return nil, fmt.Errorf("unable to parse base url: %v", err)
 	}
 
-	var links []string
+	htmlReader := strings.NewReader(htmlBody)
+	nodes, err := html.Parse(htmlReader)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse html %v", err)
+	}
 
-	var parseLinkData = func(attr []html.Attribute) {
+	var urls []string
+	var parseURLData = func(attr []html.Attribute) {
 		for _, attr := range attr {
 			if attr.Key == "href" {
-				if !strings.Contains(attr.Val, "https://") {
-					attr.Val = rawBaseURL + attr.Val
+				href, err := url.Parse(attr.Val)
+				if err != nil {
+					fmt.Printf("couldn't parse href '%v': %v\n", attr.Val, err)
+					continue
 				}
-				links = append(links, attr.Val)
+				resolvedURL := baseURL.ResolveReference(href)
+				urls = append(urls, resolvedURL.String())
 				return
 			}
 		}
@@ -32,7 +39,7 @@ func getURLsFromHTML(htmlBody, rawBaseURL string) ([]string, error) {
 	var getLinks func(node *html.Node)
 	getLinks = func(node *html.Node) {
 		if node.Type == html.ElementNode && node.Data == "a" {
-			parseLinkData(node.Attr)
+			parseURLData(node.Attr)
 		}
 		for child := node.FirstChild; child != nil; child = child.NextSibling {
 			getLinks(child)
@@ -40,5 +47,5 @@ func getURLsFromHTML(htmlBody, rawBaseURL string) ([]string, error) {
 	}
 
 	getLinks(nodes)
-	return links, nil
+	return urls, nil
 }
