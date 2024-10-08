@@ -12,8 +12,7 @@ func getURLsFromHTML(htmlBody, rawBaseURL string) ([]string, error) {
 
 	nodes, err := html.Parse(htmlReader)
 	if err != nil {
-		fmt.Errorf("unable to parse html %w", err)
-		return []string{}, nil
+		return nil, fmt.Errorf("unable to parse html %w", err)
 	}
 
 	var links []string
