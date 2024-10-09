@@ -8,12 +8,12 @@ import (
 func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 	baseURL, err := url.Parse(rawBaseURL)
 	if err != nil {
-		fmt.Errorf("unable to parse base URL: %v", err)
+		fmt.Printf("unable to parse base URL: %v", err)
 		return
 	}
 	currentURL, err := url.Parse(rawCurrentURL)
 	if err != nil {
-		fmt.Errorf("unable to parse current URL: %v", err)
+		fmt.Printf("unable to parse current URL: %v", err)
 		return
 	}
 
@@ -23,7 +23,7 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 
 	normalizedURL, err := normalizeURL(rawCurrentURL)
 	if err != nil {
-		fmt.Errorf("unable to normalize current url %v", err)
+		fmt.Printf("unable to normalize current url %v", err)
 		return
 	}
 
@@ -36,14 +36,14 @@ func crawlPage(rawBaseURL, rawCurrentURL string, pages map[string]int) {
 
 	html, err := getHTML(rawCurrentURL)
 	if err != nil {
-		fmt.Errorf("error getting html from current url %v", err)
+		fmt.Printf("error getting html from current url %v", err)
 		return
 	}
 	fmt.Printf("Getting html from: %v\n", rawCurrentURL)
 
 	urls, err := getURLsFromHTML(html, rawBaseURL)
 	if err != nil {
-		fmt.Errorf("error getting urls from html: %v", err)
+		fmt.Printf("error getting urls from html: %v", err)
 		return
 	}
 
