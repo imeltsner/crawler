@@ -18,7 +18,14 @@ func main() {
 		return
 	}
 
-	var pages = map[string]int{}
+	cfg, err := configure(args[1], 5)
+	if err != nil {
+		fmt.Printf("config error %v", err)
+		return
+	}
+
 	fmt.Printf("starting crawl of: %v\n", args[1])
-	crawlPage(args[1], args[1], pages)
+	cfg.wg.Add(1)
+	go cfg.crawlPage(args[1])
+	cfg.wg.Wait()
 }
